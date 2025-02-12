@@ -19,72 +19,56 @@
                 <li>
                     <a href="#">
                         <span class="icon">
-                            <ion-icon name="logo-apple"></ion-icon>
+                            <ion-icon name="wine-outline"></ion-icon> <!-- Verre de vin, parfait pour une application de boissons -->
                         </span>
                         <span class="title">Drink Admin</span>
                     </a>
                 </li>
 
                 <li>
-                    <a href="#">
+                    <a href="{{ url_for('home') }}">
                         <span class="icon">
-                            <ion-icon name="home-outline"></ion-icon>
+                            <ion-icon name="speedometer-outline"></ion-icon> <!-- Tableau de bord -->
                         </span>
                         <span class="title">Dashboard</span>
                     </a>
                 </li>
-
+                
+                <li>
+                    <a href="{{ url_for('clients.clients_page') }}">
+                        <span class="icon">
+                            <ion-icon name="person-outline"></ion-icon> <!-- Gestion des clients -->
+                        </span>
+                        <span class="title">Gérer Les Clients</span>
+                    </a>
+                </li>
+                
                 <li>
                     <a href="#">
                         <span class="icon">
-                            <ion-icon name="people-outline"></ion-icon>
+                            <ion-icon name="bicycle-outline"></ion-icon> <!-- Gestion des livreurs -->
                         </span>
-                        <span class="title">Customers</span>
+                        <span class="title">Gérer Les Livreurs</span>
                     </a>
                 </li>
-
+                
                 <li>
-                    <a href="#">
+                    <a href="{{ url_for('agence_bp.gestionAgences') }}">
                         <span class="icon">
-                            <ion-icon name="chatbubble-outline"></ion-icon>
+                            <ion-icon name="business-outline"></ion-icon> <!-- Gestion des agences -->
                         </span>
-                        <span class="title">Messages</span>
+                        <span class="title">Gérer Les Agences</span>
                     </a>
                 </li>
-
-                <li>
-                    <a href="#">
-                        <span class="icon">
-                            <ion-icon name="help-outline"></ion-icon>
-                        </span>
-                        <span class="title">Help</span>
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#">
-                        <span class="icon">
-                            <ion-icon name="settings-outline"></ion-icon>
-                        </span>
-                        <span class="title">Settings</span>
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#">
-                        <span class="icon">
-                            <ion-icon name="lock-closed-outline"></ion-icon>
-                        </span>
-                        <span class="title">Password</span>
-                    </a>
-                </li>
+                
+                
 
                 <li>
                   <a href="{{ url_for('logout') }}">
                     <span class="icon">
                             <ion-icon name="log-out-outline"></ion-icon>
                         </span>
-                        <span class="title">Sign Out</span>
+                        <span class="title">Déconnexion</span>
                     </a>
                 </li>
             </ul>
@@ -110,17 +94,7 @@
 
             <!-- ======================= Cards ================== -->
             <div class="cardBox">
-                <div class="card">
-                    <div>
-                        <div class="numbers">1,504</div>
-                        <div class="cardName">Daily Views</div>
-                    </div>
-
-                    <div class="iconBx">
-                        <ion-icon name="eye-outline"></ion-icon>
-                    </div>
-                </div>
-
+               
                 <div class="card">
                     <div>
                         <div class="numbers">80</div>
@@ -159,76 +133,21 @@
             <div class="details">
                 <div class="recentOrders">
                     <div class="cardHeader">
-                        <h2>Recent Orders</h2>
+                        <h2>Client Recents</h2>
                         <a href="#" class="btn">View All</a>
                     </div>
 
                     <table>
                         <thead>
                             <tr>
-                                <td>Name</td>
-                                <td>Price</td>
-                                <td>Payment</td>
-                                <td>Status</td>
+                                <td>Nom</td>
+                                <td>telephone</td>
+                                <td>addresse</td>
                             </tr>
                         </thead>
 
-                        <tbody>
-                            <tr>
-                                <td>Star Refrigerator</td>
-                                <td>$1200</td>
-                                <td>Paid</td>
-                                <td><span class="status delivered">Delivered</span></td>
-                            </tr>
-
-                            <tr>
-                                <td>Dell Laptop</td>
-                                <td>$110</td>
-                                <td>Due</td>
-                                <td><span class="status pending">Pending</span></td>
-                            </tr>
-
-                            <tr>
-                                <td>Apple Watch</td>
-                                <td>$1200</td>
-                                <td>Paid</td>
-                                <td><span class="status return">Return</span></td>
-                            </tr>
-
-                            <tr>
-                                <td>Addidas Shoes</td>
-                                <td>$620</td>
-                                <td>Due</td>
-                                <td><span class="status inProgress">In Progress</span></td>
-                            </tr>
-
-                            <tr>
-                                <td>Star Refrigerator</td>
-                                <td>$1200</td>
-                                <td>Paid</td>
-                                <td><span class="status delivered">Delivered</span></td>
-                            </tr>
-
-                            <tr>
-                                <td>Dell Laptop</td>
-                                <td>$110</td>
-                                <td>Due</td>
-                                <td><span class="status pending">Pending</span></td>
-                            </tr>
-
-                            <tr>
-                                <td>Apple Watch</td>
-                                <td>$1200</td>
-                                <td>Paid</td>
-                                <td><span class="status return">Return</span></td>
-                            </tr>
-
-                            <tr>
-                                <td>Addidas Shoes</td>
-                                <td>$620</td>
-                                <td>Due</td>
-                                <td><span class="status inProgress">In Progress</span></td>
-                            </tr>
+                        <tbody id="clients-table-body">
+                            <!-- Les données seront insérées ici dynamiquement -->
                         </tbody>
                     </table>
                 </div>
@@ -236,82 +155,7 @@
                 <!-- ================= New Customers ================ -->
                 <div class="recentCustomers">
                     <div class="cardHeader">
-                        <h2>Recent Customers</h2>
                     </div>
-
-                    <table>
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="{{ url_for('static', filename='images/customer02.jpg') }}" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>David <br> <span>Italy</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="{{ url_for('static', filename='images/customer01.jpg') }}" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>Amit <br> <span>India</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="{{ url_for('static', filename='images/customer02.jpg') }}" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>David <br> <span>Italy</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="{{ url_for('static', filename='images/customer01.jpg') }}" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>Amit <br> <span>India</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="{{ url_for('static', filename='images/customer02.jpg') }}" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>David <br> <span>Italy</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="{{ url_for('static', filename='images/customer01.jpg') }}" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>Amit <br> <span>India</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="{{ url_for('static', filename='images/customer01.jpg') }}" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>David <br> <span>Italy</span></h4>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td width="60px">
-                                <div class="imgBx"><img src="{{ url_for('static', filename='images/customer02.jpg') }}" alt=""></div>
-                            </td>
-                            <td>
-                                <h4>Amit <br> <span>India</span></h4>
-                            </td>
-                        </tr>
-                    </table>
                 </div>
             </div>
         </div>
@@ -319,6 +163,24 @@
 
     <!-- =========== Scripts =========  -->
     <script src="{{ url_for('static', filename='js/main1.js') }}"></script>
+    <script>
+        fetch('/clients/derniers_clients')
+        .then(response => response.json())
+        .then(data => {
+            let tbody = document.getElementById('clients-table-body');
+            tbody.innerHTML = "";  // Vider le tableau avant d'ajouter les nouvelles données
+    
+            data.clients.forEach(client => {
+                let row = `<tr>
+                            <td>${client.nom}</td>
+                            <td>${client.telephone}</td>
+                            <td>${client.adresse}</td>
+                          </tr>`;
+                tbody.innerHTML += row;
+            });
+        })
+        .catch(error => console.error("Erreur lors du chargement des clients :", error));
+    </script>
 
     <!-- ====== ionicons ======= -->
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>

@@ -1,12 +1,24 @@
 from flask import Flask, session, render_template, request, redirect, url_for, flash
 from config.firebase import auth  # Import de Firebase
 from routes.boissons import boisson_bp  # Import du Blueprint
+from routes.agences import agence_bp  # Import du Blueprint
+from routes.livreurs import livreur_bp  # Import du Blueprint
+from routes.commandes import commande_bp 
+from routes.clients import client_bp
+
 
 app = Flask(__name__)
-app.secret_key = 'secret'
+app.config["SECRET_KEY"] = "ICI"
+
 
 # Enregistrement du Blueprint
-app.register_blueprint(boisson_bp, url_prefix='/api')
+app.register_blueprint(boisson_bp, url_prefix='/Boissons')
+app.register_blueprint(agence_bp, url_prefix='/Agences')
+app.register_blueprint(livreur_bp, url_prefix='/Livreurs')
+app.register_blueprint(client_bp, url_prefix='/clients')
+app.register_blueprint(commande_bp, url_prefix='/commandes')
+
+
 
 # Page d'accueil après connexion
 @app.route('/home')
@@ -43,3 +55,4 @@ def logout():
 
 if __name__ == '__main__':
     app.run(port=5050, debug=True)
+

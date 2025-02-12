@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion des Agences</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <style>
+    .boisson-row { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="container mt-5">
+  <h2>Gestion des Agences</h2>
+  <form id="agence-form">
+    <input type="hidden" id="agence-id">
+    <div class="form-group">
+      <label for="agence-nom">Nom</label>
+      <input type="text" class="form-control" id="agence-nom" required>
+    </div>
+    <div class="form-group">
+      <label for="agence-adresse">Adresse</label>
+      <input type="text" class="form-control" id="agence-adresse" required>
+    </div>
+    <div class="form-group">
+      <label for="agence-telephone">Téléphone</label>
+      <input type="text" class="form-control" id="agence-telephone" required>
+    </div>
+
+    <div class="form-group">
+      <label>Stock de boissons</label>
+      <div id="boissons-container"></div>
+      <button type="button" id="add-boisson" class="btn btn-secondary btn-sm mt-2">Ajouter une boisson</button>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+  </form>
+
+  <h3 class="mt-4">Liste des Agences</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Adresse</th>
+        <th>Téléphone</th>
+        <th>Stock de Boissons</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="agences-list"></tbody>
+  </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    function fetchAgences() {
+        $.getJSON("{{ url_for('agence_bp.get_agences') }}", function(data) {
+          let rows = "";
+          if (data && data.length) {
+            data.forEach(agence => {
+              rows += `
+                <tr>
+                  <td>${agence.nom}</td>
+                  <td>${agence.adresse}</td>
+                  <td>${agence.telephone}</td>
+                  <td>${(agence.stock_boissons || []).map(b => b.nom || "Inconnu").join(', ')}</td>
+                  <td>
+                    <button class="btn btn-warning btn-sm" onclick="editAgence('${agence.id}')">Modifier</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteAgence('${agence.id}')">Supprimer</button>
+                  </td>
+                </tr>`;
+            });
+            $("#agences-list").html(rows);
+          } else {
+            $("#agences-list").html('<tr><td colspan="5" class="text-center">Aucune agence trouvée.</td></tr>');
+          }
+        });
+      }
+    
+    function fetchBoissons() {
+      return $.getJSON("/Boissons/boissons");
+    }
+
+    $("#add-boisson").on("click", function() {
+      fetchBoissons().then(function(boissons) {
+        let options = boissons.map(boisson => `<option value="${boisson.id}">${boisson.nom}</option>`).join('');
+        $("#boissons-container").append(`
+          <div class="boisson-row row">
+            <div class="col-md-6">
+              <select class="form-control boisson-id" required>
+                <option value="">Sélectionner une boisson</option>
+                ${options}
+              </select>
+            </div>
+            <div class="col-md-4">
+              <input type="number" class="form-control boisson-quantite" placeholder="Quantité" required>
+            </div>
+            <div class="col-md-2">
+              <button type="button" class="btn btn-danger btn-sm remove-boisson">Supprimer</button>
+            </div>
+          </div>`);
+      });
+    });
+
+    $(document).on("click", ".remove-boisson", function() {
+      $(this).closest(".boisson-row").remove();
+    });
+
+    function getStockBoissons() {
+      let stock = [];
+      $("#boissons-container .boisson-row").each(function() {
+        let idBoisson = $(this).find(".boisson-id").val();
+        let quantite = parseInt($(this).find(".boisson-quantite").val(), 10);
+        if (idBoisson && !isNaN(quantite)) {
+          stock.push({ id: idBoisson, quantite });
+        }
+      });
+      return stock;
+    }
+
+    $("#agence-form").on("submit", function(event) {
+      event.preventDefault();
+      const id = $("#agence-id").val();
+      const data = {
+        nom: $("#agence-nom").val(),
+        adresse: $("#agence-adresse").val(),
+        telephone: $("#agence-telephone").val(),
+        stock_boissons: getStockBoissons()
+      };
+      const url = id ? `/Agences/agences/${id}` : "/Agences/agences";
+      const method = id ? "PUT" : "POST";
+      $.ajax({
+        url, type: method, contentType: "application/json",
+        data: JSON.stringify(data),
+        success: function(response) {
+          alert(response.message);
+          fetchAgences();
+          $("#agence-form")[0].reset();
+          $("#boissons-container").empty();
+          $("#agence-id").val(""); // Réinitialisation de l'ID
+        }
+      });
+    });
+
+    // MÉTHODE POUR MODIFIER UNE AGENCE
+    window.editAgence = function(id) {
+      $.getJSON(`/Agences/agences/${id}`, function(agence) {
+        $("#agence-id").val(agence.id);
+        $("#agence-nom").val(agence.nom);
+        $("#agence-adresse").val(agence.adresse);
+        $("#agence-telephone").val(agence.telephone);
+        $("#boissons-container").empty();
+
+        if (agence.stock_boissons && agence.stock_boissons.length > 0) {
+          fetchBoissons().then(function(boissons) {
+            let options = boissons.map(boisson => `<option value="${boisson.id}">${boisson.nom}</option>`).join('');
+            agence.stock_boissons.forEach(stock => {
+              $("#boissons-container").append(`
+                <div class="boisson-row row">
+                  <div class="col-md-6">
+                    <select class="form-control boisson-id" required>
+                      <option value="">Sélectionner une boisson</option>
+                      ${options}
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <input type="number" class="form-control boisson-quantite" value="${stock.quantite}" required>
+                  </div>
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-danger btn-sm remove-boisson">Supprimer</button>
+                  </div>
+                </div>`);
+              $("#boissons-container .boisson-row:last-child .boisson-id").val(stock.id);
+            });
+          });
+        }
+      });
+    };
+
+    // MÉTHODE POUR SUPPRIMER UNE AGENCE
+    window.deleteAgence = function(id) {
+      if (confirm("Voulez-vous vraiment supprimer cette agence ?")) {
+        $.ajax({
+          url: `/Agences/agences/${id}`,
+          type: "DELETE",
+          success: function(response) {
+            alert(response.message);
+            fetchAgences();
+          }
+        });
+      }
+    };
+
+    fetchAgences();
+  });
+</script>
+
+</body>
+</html>
