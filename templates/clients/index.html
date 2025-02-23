@@ -11,19 +11,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <style>
+        body {
+            background-color:rgb(228, 243, 245);
+            margin: 0;
+            padding: 0;
+        }
+
         /* Sidebar */
         .sidebar {
             width: 250px;
             height: 100vh;
-            background-color: #2A1B76; /* Bleu foncé */
+            background-color: #2A1B76;
             position: fixed;
             top: 0;
             left: 0;
             padding-top: 20px;
-            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .sidebar a {
+            width: 90%;
             padding: 15px;
             display: flex;
             align-items: center;
@@ -31,28 +40,82 @@
             color: white;
             font-size: 16px;
             transition: 0.3s;
+            border-radius: 10px;
+            margin: 5px 0;
         }
 
         .sidebar a:hover {
             background: #FFFFFF33;
-            border-radius: 10px;
         }
 
         .sidebar .active {
             background: white;
             color: #2A1B76;
-            border-radius: 10px;
+            border-radius: 20px;
         }
 
         .sidebar a i {
             width: 25px;
             margin-right: 10px;
+            font-size: 18px;
         }
 
+        .sidebar h4 {
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .logout {
+            margin-top: auto;
+            margin-bottom: 20px;
+            background: white;
+            color: #2A1B76;
+            width: 90%;
+            border-radius: 20px;
+        }
+
+        /* Contenu principal */
         .content {
-            margin-left: 260px;
+            margin-left: 270px;
             padding: 20px;
-            background-color: #f0f0f0; /* Fond gris pour la page */
+        }
+
+        /* Cartes clients */
+        .clients-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .client-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            flex: 1 1 calc(50% - 20px);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .client-avatar {
+            font-size: 50px;
+            color: #2A1B76;
+        }
+
+        .client-info {
+            flex-grow: 1;
+        }
+
+        .client-actions i {
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: 0.3s;
+        }
+
+        .client-actions i:hover {
+            color: #2A1B76;
         }
 
         /* Formulaire de modification */
@@ -81,30 +144,6 @@
             z-index: 999;
             display: none;
         }
-
-        /* Stylisation du tableau */
-        table {
-            border-radius: 10px;
-            overflow: hidden;
-            border-collapse: separate;
-            border-spacing: 0;
-            background-color: white;
-        }
-
-        table thead {
-            background-color: #2A1B76;
-            color: white;
-        }
-
-        table td, table th {
-            padding: 12px 15px;
-            text-align: left;
-        }
-
-        /* Effet de survol des lignes */
-        table tbody tr:hover {
-            background-color: #f1f1f1;
-        }
     </style>
 </head>
 <body>
@@ -114,26 +153,15 @@
         <h4 class="text-center">Drink Admin</h4>
         <a href="{{ url_for('home') }}" class="{{ 'active' if request.endpoint == 'home' else '' }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <a href="{{ url_for('clients.clients_page') }}" class="{{ 'active' if request.endpoint == 'clients.clients_page' else '' }}"><i class="fas fa-user"></i> Gérer Les Clients</a>
-        <a href="#"><i class="fas fa-bicycle"></i> Gérer Les Livreurs</a>
-        <a href="#"><i class="fas fa-building"></i> Gérer Les Agences</a>
-        <a href="#"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+        <a href="{{ url_for('livreurs.livreur_page') }}"><i class="fas fa-bicycle"></i> Gérer Les Livreurs</a>
+        <a href="{{ url_for('agence_bp.gestionAgences') }}"><i class="fas fa-building"></i> Gérer Les Agences</a>
+        <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
     </div>
-    
 
     <!-- Contenu principal -->
     <div class="content">
-        <h1 class="text-center">Liste des Clients</h1>
-        <table class="table table-bordered table-striped mt-3">
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Téléphone</th>
-                    <th>Adresse</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="clients-list"></tbody>
-        </table>
+        <h1 class="text-center mb-4">Liste des Clients</h1>
+        <div class="clients-container" id="clients-list"></div>
     </div>
 
     <!-- Overlay pour effet flou -->
@@ -163,20 +191,23 @@
     <script>
         function fetchClients() {
             $.getJSON("/clients/index_clients", function(data) {
-                let rows = "";
+                let clientCards = "";
                 data.clients.forEach(client => {
-                    rows += `
-                        <tr>
-                            <td>${client.nom}</td>
-                            <td>${client.telephone}</td>
-                            <td>${client.adresse}</td>
-                            <td>
-                                <button class="btn btn-warning btn-sm" onclick="showEditForm('${client.id}', '${client.nom}', '${client.adresse}')">Modifier</button>
-                                <button class="btn btn-danger btn-sm" onclick="confirmDelete('${client.id}')">Supprimer</button>
-                            </td>
-                        </tr>`;
+                    clientCards += `
+                        <div class="client-card">
+                            <i class="fas fa-user-circle client-avatar"></i>
+                            <div class="client-info">
+                                <h5>${client.nom}</h5>
+                                <p><i class="fas fa-phone"></i> ${client.telephone}</p>
+                                <p><i class="fas fa-map-marker-alt"></i> ${client.adresse}</p>
+                            </div>
+                            <div class="client-actions">
+                                <i class="fas fa-edit text-warning" onclick="showEditForm('${client.id}', '${client.nom}', '${client.adresse}')"></i>
+                                <i class="fas fa-trash text-danger" onclick="confirmDelete('${client.id}')"></i>
+                            </div>
+                        </div>`;
                 });
-                $("#clients-list").html(rows);
+                $("#clients-list").html(clientCards);
             });
         }
 
@@ -186,13 +217,11 @@
             $("#edit-adresse").val(adresse);
             $("#edit-form").show();
             $("#overlay").show();
-            $("body").addClass("blur-background");
         }
 
         function hideEditForm() {
             $("#edit-form").hide();
             $("#overlay").hide();
-            $("body").removeClass("blur-background");
         }
 
         function updateClient() {
@@ -204,28 +233,13 @@
                 url: "/clients/modifier",
                 type: "PUT",
                 contentType: "application/json",
-                data: JSON.stringify({ id_client: id, nom: nom, adresse: adresse, mot_de_passe: "default" }),
+                data: JSON.stringify({ id_client: id, nom: nom, adresse: adresse }),
                 success: function(response) {
                     alert(response.message);
                     fetchClients();
                     hideEditForm();
                 }
             });
-        }
-
-        function confirmDelete(id) {
-            if (confirm("Voulez-vous vraiment supprimer ce client ?")) {
-                $.ajax({
-                    url: "/clients/supprimer",
-                    type: "DELETE",
-                    contentType: "application/json",
-                    data: JSON.stringify({ id_client: id }),
-                    success: function(response) {
-                        alert(response.message);
-                        fetchClients();
-                    }
-                });
-            }
         }
 
         $(document).ready(fetchClients);

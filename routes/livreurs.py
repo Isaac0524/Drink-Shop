@@ -1,5 +1,8 @@
 from flask import Blueprint, request, jsonify
 from models.livreur import Livreur
+from flask import render_template
+from config.firebase import db
+
 
 livreur_bp = Blueprint('livreurs', __name__)
 
@@ -18,12 +21,6 @@ def add_livreur():
     livreur = Livreur(**data)
     livreur.save()
     return jsonify({"message": "Livreur ajouté avec succès", "livreur": livreur.to_dict()}), 201
-
-
-@livreur_bp.route('/livreurs', methods=['GET'])
-def get_livreurs():
-    """Récupère tous les livreurs"""
-    return jsonify(Livreur.get_all()), 200
 
 
 @livreur_bp.route('/<livreur_id>', methods=['GET'])
@@ -131,3 +128,9 @@ def modifier_mdp_livreur():
     Livreur.update(data["id_livreur"], {"mot_de_passe": nouveau_mdp_hache})
 
     return jsonify({"message": "Mot de passe mis à jour avec succès"}), 200
+
+@livreur_bp.route('/livreurs', methods=['GET'])
+def livreur_page():
+    agences = db.child("agences").get().val() or {}  # Récupération des agences
+    livreurs = db.child("livreurs").get().val() or {}
+    return render_template("Livreurs/livreur.html")

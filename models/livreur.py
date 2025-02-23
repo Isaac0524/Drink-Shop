@@ -42,3 +42,13 @@ class Livreur:
         for livreur in livreurs.each():
             return livreur.key(), livreur.val()
         return None, None
+    
+    @staticmethod
+    def get_all():
+        """Récupère tous les livreurs depuis Firebase"""
+        livreurs = db.child("livreurs").get().val()
+        if not livreurs:
+            return []
+        
+        # Convertir le dictionnaire Firebase en liste
+        return [{"id": key, **value} for key, value in livreurs.items()]
